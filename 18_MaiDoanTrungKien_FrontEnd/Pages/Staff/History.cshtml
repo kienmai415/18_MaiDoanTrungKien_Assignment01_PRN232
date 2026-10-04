@@ -1,0 +1,85 @@
+@page
+@model _18_MaiDoanTrungKien_FrontEnd.Pages.Staff.HistoryModel
+@{
+    ViewData["Title"] = "My News History";
+}
+
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-header bg-white py-3 border-0">
+        <h4 class="fw-bold mb-0 text-primary">
+            <i class="bi bi-clock-history me-2"></i>My News Articles History
+        </h4>
+        <small class="text-muted">All articles created by you in the system</small>
+    </div>
+
+    <div class="card-body p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 100px;">ID</th>
+                        <th>Title & Headline</th>
+                        <th>Category</th>
+                        <th>Tags</th>
+                        <th>Created Date</th>
+                        <th>Modified Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Articles.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                <i class="bi bi-journal-x fs-4 d-block mb-1"></i> You have not created any news articles yet.
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var article in Model.Articles)
+                    {
+                        <tr>
+                            <td><span class="badge bg-secondary font-monospace">@article.NewsArticleId</span></td>
+                            <td>
+                                <div class="fw-bold text-dark">@article.NewsTitle</div>
+                                <div class="small text-muted text-truncate" style="max-width: 320px;">@article.Headline</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-info-subtle text-info border">
+                                    @(article.Category?.CategoryName ?? "General")
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1" style="max-width: 180px;">
+                                    @foreach (var tag in article.Tags)
+                                    {
+                                        <span class="badge bg-light text-secondary border small">@tag.TagName</span>
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    @(article.CreatedDate?.ToString("yyyy-MM-dd HH:mm") ?? "N/A")
+                                </small>
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    @(article.ModifiedDate?.ToString("yyyy-MM-dd HH:mm") ?? "Not modified")
+                                </small>
+                            </td>
+                            <td>
+                                @if (article.NewsStatus)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Inactive</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

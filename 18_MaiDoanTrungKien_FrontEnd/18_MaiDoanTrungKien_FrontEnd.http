@@ -1,0 +1,6 @@
+@_18_MaiDoanTrungKien_FrontEnd_HostAddress = http://localhost:5264
+
+GET {{_18_MaiDoanTrungKien_FrontEnd_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

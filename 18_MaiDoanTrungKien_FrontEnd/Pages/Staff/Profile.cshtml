@@ -1,0 +1,52 @@
+@page
+@model _18_MaiDoanTrungKien_FrontEnd.Pages.Staff.ProfileModel
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white py-3 border-0">
+                <h4 class="fw-bold mb-0 text-primary">
+                    <i class="bi bi-person-gear me-2"></i>My Profile
+                </h4>
+                <small class="text-muted">Manage and update your personal account information</small>
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    <input type="hidden" asp-for="ProfileForm.AccountId" />
+                    <input type="hidden" asp-for="ProfileForm.AccountRole" />
+
+                    <div class="mb-3">
+                        <label asp-for="ProfileForm.AccountName" class="form-label fw-semibold">Full Name</label>
+                        <input asp-for="ProfileForm.AccountName" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ProfileForm.AccountEmail" class="form-label fw-semibold">Email Address</label>
+                        <input asp-for="ProfileForm.AccountEmail" type="email" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Role</label>
+                        <input type="text" class="form-control" value="@Model.ProfileForm.RoleName" readonly disabled />
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="ProfileForm.AccountPassword" class="form-label fw-semibold">New Password (Optional)</label>
+                        <input asp-for="ProfileForm.AccountPassword" type="password" class="form-control" placeholder="Leave blank to keep current password" />
+                        <small class="text-muted">Only fill this field if you wish to change your password.</small>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-page="/Staff/NewsArticles" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4">
+                            <i class="bi bi-check-lg me-1"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

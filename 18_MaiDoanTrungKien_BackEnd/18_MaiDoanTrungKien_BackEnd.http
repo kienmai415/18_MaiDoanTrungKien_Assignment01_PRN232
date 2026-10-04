@@ -1,0 +1,6 @@
+@_18_MaiDoanTrungKien_BackEnd_HostAddress = http://localhost:5041
+
+GET {{_18_MaiDoanTrungKien_BackEnd_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

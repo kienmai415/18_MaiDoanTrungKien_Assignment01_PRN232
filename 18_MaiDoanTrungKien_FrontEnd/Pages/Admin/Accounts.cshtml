@@ -1,0 +1,203 @@
+@page
+@model _18_MaiDoanTrungKien_FrontEnd.Pages.Admin.AccountsModel
+@{
+    ViewData["Title"] = "Account Management";
+}
+
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-header bg-white py-3 border-0">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+                <h4 class="fw-bold mb-0 text-primary">
+                    <i class="bi bi-people-fill me-2"></i>Account Management
+                </h4>
+                <small class="text-muted">Manage system users, staff, and lecturers</small>
+            </div>
+            <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" onclick="openCreateModal()">
+                <i class="bi bi-person-plus-fill me-1"></i> Add Account
+            </button>
+        </div>
+    </div>
+
+    <div class="card-body p-4">
+        <!-- Search bar -->
+        <form method="get" class="row g-2 mb-4">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                    <input type="text" name="Keyword" value="@Model.Keyword" class="form-control" placeholder="Search by name or email..." />
+                    @if (!string.IsNullOrEmpty(Model.Keyword))
+                    {
+                        <a asp-page="/Admin/Accounts" class="btn btn-outline-secondary"><i class="bi bi-x"></i></a>
+                    }
+                    <button class="btn btn-outline-primary" type="submit">Search</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Accounts Table -->
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 80px;">ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th class="text-end" style="width: 180px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Accounts.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-4 d-block mb-1"></i> No accounts found.
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var acc in Model.Accounts)
+                    {
+                        <tr>
+                            <td><span class="badge bg-secondary">#@acc.AccountId</span></td>
+                            <td class="fw-semibold">@acc.AccountName</td>
+                            <td>@acc.AccountEmail</td>
+                            <td>
+                                @if (acc.AccountRole == 1)
+                                {
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 rounded-pill">Staff</span>
+                                }
+                                else if (acc.AccountRole == 2)
+                                {
+                                    <span class="badge bg-info-subtle text-info border border-info-subtle px-3 py-1 rounded-pill">Lecturer</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-1 rounded-pill">User</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill me-1"
+                                        onclick="openEditModal(@acc.AccountId, '@JavaScriptEncoder.Default.Encode(acc.AccountName ?? "")', '@acc.AccountEmail', @(acc.AccountRole))">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill"
+                                        onclick="confirmDelete(@acc.AccountId, '@JavaScriptEncoder.Default.Encode(acc.AccountName ?? acc.AccountEmail)')">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Account Popup Dialog (Modal) for Create & Update -->
+<div class="modal fade" id="accountModal" tabindex="-1" aria-labelledby="accountModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form method="post" id="accountForm">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold" id="accountModalLabel">Account</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <input type="hidden" asp-for="AccountForm.AccountId" id="formAccountId" />
+
+                    <div class="mb-3">
+                        <label asp-for="AccountForm.AccountName" class="form-label fw-semibold">Full Name</label>
+                        <input asp-for="AccountForm.AccountName" id="formAccountName" class="form-control" required placeholder="e.g. John Doe" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="AccountForm.AccountEmail" class="form-label fw-semibold">Email Address</label>
+                        <input asp-for="AccountForm.AccountEmail" id="formAccountEmail" type="email" class="form-control" required placeholder="name@funews.org" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="AccountForm.AccountRole" class="form-label fw-semibold">Role</label>
+                        <select asp-for="AccountForm.AccountRole" id="formAccountRole" class="form-select">
+                            <option value="1">Staff (Role = 1)</option>
+                            <option value="2">Lecturer (Role = 2)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3" id="passwordGroup">
+                        <label asp-for="AccountForm.AccountPassword" class="form-label fw-semibold" id="formPasswordLabel">Password</label>
+                        <input asp-for="AccountForm.AccountPassword" id="formAccountPassword" type="password" class="form-control" placeholder="••••••••" />
+                        <small class="text-muted" id="passwordHelpText"></small>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" id="formSubmitBtn" class="btn btn-primary rounded-pill px-4">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-body p-4 text-center">
+                <i class="bi bi-exclamation-triangle-fill text-danger display-4 mb-3 d-block"></i>
+                <h5 class="fw-bold mb-2">Confirm Delete</h5>
+                <p class="text-muted small mb-4">
+                    Are you sure you want to delete account <strong id="deleteAccountName"></strong>? This action cannot be undone.
+                </p>
+                <form method="post" asp-page-handler="Delete" id="deleteForm">
+                    <input type="hidden" name="id" id="deleteAccountId" />
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger rounded-pill px-3">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const accountModal = new bootstrap.Modal(document.getElementById('accountModal'));
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+
+        function openCreateModal() {
+            document.getElementById('accountModalLabel').textContent = 'Add New Account';
+            document.getElementById('accountForm').action = '?handler=Create';
+            document.getElementById('formAccountId').value = '0';
+            document.getElementById('formAccountName').value = '';
+            document.getElementById('formAccountEmail').value = '';
+            document.getElementById('formAccountRole').value = '1';
+            document.getElementById('formAccountPassword').value = '';
+            document.getElementById('formAccountPassword').required = true;
+            document.getElementById('passwordHelpText').textContent = 'Required for new accounts.';
+            document.getElementById('formSubmitBtn').textContent = 'Create Account';
+            accountModal.show();
+        }
+
+        function openEditModal(id, name, email, role) {
+            document.getElementById('accountModalLabel').textContent = 'Edit Account';
+            document.getElementById('accountForm').action = '?handler=Update';
+            document.getElementById('formAccountId').value = id;
+            document.getElementById('formAccountName').value = name;
+            document.getElementById('formAccountEmail').value = email;
+            document.getElementById('formAccountRole').value = role;
+            document.getElementById('formAccountPassword').value = '';
+            document.getElementById('formAccountPassword').required = false;
+            document.getElementById('passwordHelpText').textContent = 'Leave empty if you do not want to change password.';
+            document.getElementById('formSubmitBtn').textContent = 'Update Account';
+            accountModal.show();
+        }
+
+        function confirmDelete(id, name) {
+            document.getElementById('deleteAccountId').value = id;
+            document.getElementById('deleteAccountName').textContent = name;
+            deleteModal.show();
+        }
+    </script>
+}
