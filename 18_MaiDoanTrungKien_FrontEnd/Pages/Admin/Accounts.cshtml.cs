@@ -36,6 +36,10 @@ public class AccountsModel : PageModel
         return Page();
     }
 
+    // =========================================================================================
+    // [LUỒNG TẠO TÀI KHOẢN]: Gọi khi submit form Modal "Create Account"
+    // Tiếp theo: Gọi ApiService.CreateAccountAsync -> Gửi POST "api/Accounts" sang AccountsController
+    // =========================================================================================
     public async Task<IActionResult> OnPostCreateAsync()
     {
         if (!SessionHelper.IsAdmin(HttpContext.Session))
@@ -62,6 +66,10 @@ public class AccountsModel : PageModel
         return RedirectToPage(new { keyword = Keyword });
     }
 
+    // =========================================================================================
+    // [LUỒNG CẬP NHẬT TÀI KHOẢN]: Gọi khi submit form Modal "Edit Account"
+    // Tiếp theo: Gọi ApiService.UpdateAccountAsync -> Gửi PUT "api/Accounts/{id}" sang AccountsController
+    // =========================================================================================
     public async Task<IActionResult> OnPostUpdateAsync()
     {
         if (!SessionHelper.IsAdmin(HttpContext.Session))
@@ -88,6 +96,12 @@ public class AccountsModel : PageModel
         return RedirectToPage(new { keyword = Keyword });
     }
 
+    // =========================================================================================
+    // [LUỒNG XÓA TÀI KHOẢN (CÓ CONFIRM SWEETALERT2)]:
+    // Gọi sau khi người dùng bấm xác nhận trên Popup xác nhận xóa.
+    // Tiếp theo: Gọi ApiService.DeleteAccountAsync(id) -> Gửi DELETE "api/Accounts/{id}" sang BackEnd
+    // Phía BackEnd sẽ kiểm tra ràng buộc HasCreatedNews trước khi xóa.
+    // =========================================================================================
     public async Task<IActionResult> OnPostDeleteAsync(short id)
     {
         if (!SessionHelper.IsAdmin(HttpContext.Session))

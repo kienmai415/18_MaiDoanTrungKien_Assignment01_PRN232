@@ -17,6 +17,12 @@ public class AuthController : ControllerBase
         _configuration = configuration;
     }
 
+    // =========================================================================================
+    // [BƯỚC 4 - BACKEND CONTROLLER]: Tiếp nhận HTTP POST "api/Auth/login" từ ApiService
+    // Luồng rẽ thành 2 nhánh:
+    //   - Nhánh 1: Nếu là Admin -> Kiểm tra từ appsettings.json (không vào DB).
+    //   - Nhánh 2: Nếu là Staff/Lecturer -> Gọi sang tầng Repository: ISystemAccountRepository.Authenticate(...)
+    // =========================================================================================
     [HttpPost("login")]
     public IActionResult Login([FromBody] LoginRequest request)
     {
@@ -27,7 +33,7 @@ public class AuthController : ControllerBase
 
         var normalizedEmail = request.Email.Trim().ToLower();
 
-        // 1. Check Admin Account from appsettings.json
+        // 1. [NHÁNH 1 - ADMIN]: Kiểm tra Admin Account trực tiếp từ file appsettings.json
         var adminEmail = _configuration["AdminAccount:Email"]?.Trim().ToLower();
         var adminPassword = _configuration["AdminAccount:Password"];
 
@@ -38,18 +44,20 @@ public class AuthController : ControllerBase
                 AccountId = 0,
                 AccountName = "Administrator",
                 AccountEmail = _configuration["AdminAccount:Email"]!,
-                AccountRole = 0, // 0 indicates Admin
+                AccountRole = 0, // 0 chỉ định quyền Admin
                 RoleName = "Admin"
             });
         }
 
-        // 2. Check Database System Accounts (Staff / Lecturer)
+        // 2. [NHÁNH 2 - STAFF / LECTURER]: Gọi sang SystemAccountRepository.Authenticate(...)
+        // Tiếp theo: SystemAccountRepository sẽ gọi SystemAccountDAO.Instance.Authenticate(...)
         var user = _accountRepository.Authenticate(request.Email, request.Password);
         if (user == null)
         {
             return Unauthorized(new { message = "Invalid email or password." });
         }
 
+        // Ánh xạ mã Role trong DB: 1 -> Staff, 2 -> Lecturer
         var roleName = user.AccountRole switch
         {
             1 => "Staff",

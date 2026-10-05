@@ -61,13 +61,20 @@ public class ApiService : IApiService
         };
     }
 
+    // =========================================================================================
+    // [BƯỚC 3 - HTTP CLIENT CONSUMER]: Đóng gói thông tin (Email, Password) thành JSON
+    // Gửi HTTP POST request đến endpoint "api/Auth/login" của BackEnd (Port 5041).
+    // Phía BackEnd sẽ tiếp nhận tại hàm: AuthController.Login([FromBody] LoginRequest request)
+    // =========================================================================================
     public async Task<(bool Success, LoginResultDto? User, string Error)> LoginAsync(string email, string password)
     {
         try
         {
+            // Gửi HTTP POST sang BackEnd Web API
             var response = await _httpClient.PostAsJsonAsync("Auth/login", new { Email = email, Password = password });
             if (response.IsSuccessStatusCode)
             {
+                // Deserialize JSON response trả về thành đối tượng LoginResultDto
                 var user = await response.Content.ReadFromJsonAsync<LoginResultDto>(_jsonOptions);
                 return (true, user, string.Empty);
             }

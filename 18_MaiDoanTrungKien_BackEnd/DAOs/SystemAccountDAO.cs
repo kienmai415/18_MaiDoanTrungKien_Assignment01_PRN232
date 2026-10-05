@@ -6,13 +6,22 @@ using _18_MaiDoanTrungKien_BackEnd.Models;
 
 namespace _18_MaiDoanTrungKien_BackEnd.DAOs;
 
+// =========================================================================================
+// [BƯỚC 6 - TẦNG DATA ACCESS OBJECT (SINGLETON PATTERN)]:
+// Lớp này trực tiếp khởi tạo FunewsManagementContext (Entity Framework Core)
+// để thực thi các câu lệnh LINQ và truy vấn xuống SQL Server Database.
+// Áp dụng Singleton Pattern (private constructor + Instance static property + lock)
+// đúng theo yêu cầu thiết kế hệ thống ở Trang 2 của đề bài.
+// =========================================================================================
 public class SystemAccountDAO
 {
     private static SystemAccountDAO? _instance;
     private static readonly object _instanceLock = new object();
 
+    // Private constructor ngăn việc khởi tạo từ bên ngoài
     private SystemAccountDAO() { }
 
+    // Thuộc tính Instance cung cấp điểm truy cập duy nhất (Singleton Pattern)
     public static SystemAccountDAO Instance
     {
         get
@@ -43,6 +52,12 @@ public class SystemAccountDAO
         return context.SystemAccounts.AsNoTracking().FirstOrDefault(a => a.AccountEmail.ToLower() == email.Trim().ToLower());
     }
 
+    // =========================================================================================
+    // [BƯỚC 7 - TRUY VẤN SQL SERVER]: Kiểm tra Email & Password trong bảng SystemAccount.
+    // Nếu tìm thấy -> Trả về entity SystemAccount.
+    // Kết quả sẽ đi ngược lại: SystemAccountDAO -> SystemAccountRepository -> AuthController
+    // -> ApiService -> LoginModel -> Cập nhật Session & chuyển hướng trang.
+    // =========================================================================================
     public SystemAccount? Authenticate(string email, string password)
     {
         using var context = new FunewsManagementContext();
@@ -50,6 +65,7 @@ public class SystemAccountDAO
             .FirstOrDefault(a => a.AccountEmail.ToLower() == email.Trim().ToLower() && a.AccountPassword == password);
     }
 
+    // Kiểm tra ràng buộc nghiệp vụ: Tài khoản đã từng tạo bài viết chưa?
     public bool HasCreatedNews(short accountId)
     {
         using var context = new FunewsManagementContext();
@@ -98,6 +114,15 @@ public class SystemAccountDAO
         return context.SaveChanges() > 0;
     }
 
+    // =========================================================================================
+    // [RÀNG BUỘC NGHIỆP VỤ XÓA TÀI KHOẢN (TRANG 4 ĐỀ BÀI)]:
+    // "the delete action will delete an account in the case this account does not belong to any news articles (created),
+    // if the account is already created any news article, cannot delete."
+    // Luồng:
+    // 1. Kiểm tra HasCreatedNews(accountId).
+    // 2. Nếu đã có bài viết -> Ném InvalidOperationException (Controller sẽ trả về 400 Bad Request).
+    // 3. Nếu chưa viết bài -> Thực hiện Hard Delete (Remove khỏi DbSet và SaveChanges).
+    // =========================================================================================
     public bool DeleteAccount(short accountId)
     {
         using var context = new FunewsManagementContext();
