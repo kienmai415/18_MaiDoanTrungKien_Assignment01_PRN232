@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using _18_MaiDoanTrungKien_BackEnd.Models;
 using _18_MaiDoanTrungKien_BackEnd.Repositories;
 
@@ -16,6 +17,7 @@ public class TagsController : ControllerBase
     }
 
     [HttpGet]
+    [EnableQuery]
     public ActionResult<IEnumerable<Tag>> GetTags()
     {
         return Ok(_tagRepository.GetTags());
