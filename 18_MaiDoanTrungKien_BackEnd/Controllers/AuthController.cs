@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using _18_MaiDoanTrungKien_BackEnd.DTOs;
 using _18_MaiDoanTrungKien_BackEnd.Repositories;
 
@@ -103,5 +104,50 @@ public class AuthController : ControllerBase
             user.AccountRole,
             RoleName = user.AccountRole == 1 ? "Staff" : "Lecturer"
         });
+    }
+
+    // =========================================================================================
+    // [TRUY VẤN ODATA CHO AUTH / HỆ THỐNG]:
+    // Endpoint: GET api/Auth/users
+    // Trả về danh sách tài khoản đã xác thực trong hệ thống (gồm Admin trong appsettings.json và Staff/Lecturer trong DB)
+    // Hỗ trợ đầy đủ OData: $filter, $select, $orderby, $top, $skip
+    // =========================================================================================
+    [HttpGet("users")]
+    [EnableQuery]
+    public ActionResult<IEnumerable<LoginResponse>> GetAuthUsers()
+    {
+        var users = new List<LoginResponse>();
+
+        // 1. Lấy tài khoản Admin từ appsettings.json
+        var adminEmail = _configuration["AdminAccount:Email"];
+        if (!string.IsNullOrEmpty(adminEmail))
+        {
+            users.Add(new LoginResponse
+            {
+                AccountId = 0,
+                AccountName = "Administrator",
+                AccountEmail = adminEmail,
+                AccountRole = 0,
+                RoleName = "Admin"
+            });
+        }
+
+        // 2. Lấy danh sách tài khoản trong cơ sở dữ liệu (Staff / Lecturer)
+        var dbAccounts = _accountRepository.GetAccounts();
+        users.AddRange(dbAccounts.Select(a => new LoginResponse
+        {
+            AccountId = a.AccountId,
+            AccountName = a.AccountName ?? string.Empty,
+            AccountEmail = a.AccountEmail,
+            AccountRole = a.AccountRole ?? 1,
+            RoleName = a.AccountRole switch
+            {
+                1 => "Staff",
+                2 => "Lecturer",
+                _ => "User"
+            }
+        }));
+
+        return Ok(users);
     }
 }
