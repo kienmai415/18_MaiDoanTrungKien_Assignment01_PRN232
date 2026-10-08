@@ -19,6 +19,10 @@ public class ProfileModel : PageModel
     [BindProperty]
     public AccountViewModel ProfileForm { get; set; } = new();
 
+    // =========================================================================================
+    // [LUỒNG TẢI HỒ SƠ CÁ NHÂN]: Lấy thông tin tài khoản hiện tại từ Session và BackEnd
+    // Tiếp theo: Gọi ApiService.GetAccountByIdAsync(currentUser.AccountId) -> GET api/Accounts/{id}
+    // =========================================================================================
     public async Task<IActionResult> OnGetAsync()
     {
         var currentUser = SessionHelper.GetUser(HttpContext.Session);
@@ -43,6 +47,13 @@ public class ProfileModel : PageModel
         return Page();
     }
 
+    // =========================================================================================
+    // [LUỒNG CẬP NHẬT HỒ SƠ CÁ NHÂN (TRANG 4 ĐỀ BÀI)]: "Manage his/her profile."
+    // 1. Kiểm tra validation (Name, Email không được để trống).
+    // 2. Cho phép đổi Tên hoặc Mật khẩu mới.
+    // 3. Gọi ApiService.UpdateAccountAsync(ProfileForm) -> Gửi PUT api/Accounts/{id}.
+    // 4. Nếu thành công -> Cập nhật lại Session để hiển thị tên mới trên Menu.
+    // =========================================================================================
     public async Task<IActionResult> OnPostAsync()
     {
         var currentUser = SessionHelper.GetUser(HttpContext.Session);

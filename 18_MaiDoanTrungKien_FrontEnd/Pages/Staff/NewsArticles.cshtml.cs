@@ -30,6 +30,13 @@ public class NewsArticlesModel : PageModel
     [BindProperty]
     public List<int> SelectedTags { get; set; } = new();
 
+    // =========================================================================================
+    // [LUỒNG TẢI DỮ LIỆU BÀI VIẾT]: Gọi khi Staff truy cập trang /Staff/NewsArticles
+    // 1. Kiểm tra quyền Session (chỉ Staff hoặc Admin mới được xem).
+    // 2. Tải danh sách Categories và Tags để nạp vào dropdown/checkbox trên popup modal.
+    // 3. Tải danh sách Articles (có hỗ trợ tìm kiếm từ khóa Keyword).
+    // Tiếp theo: Gọi ApiService.GetActiveCategoriesAsync(), GetTagsAsync(), GetNewsArticlesAsync()
+    // =========================================================================================
     public async Task<IActionResult> OnGetAsync()
     {
         if (!SessionHelper.IsStaff(HttpContext.Session) && !SessionHelper.IsAdmin(HttpContext.Session))
@@ -44,6 +51,13 @@ public class NewsArticlesModel : PageModel
         return Page();
     }
 
+    // =========================================================================================
+    // [LUỒNG TẠO BÀI VIẾT MỚI & GÁN TAGS (TRANG 4 ĐỀ BÀI)]:
+    // Kích hoạt khi Staff submit form trên Popup Dialog "Add News Article".
+    // 1. Tự động lấy AccountId của Staff đang đăng nhập để gán vào CreatedById.
+    // 2. Gom thông tin bài viết (ArticleForm) và danh sách thẻ được tích chọn (SelectedTags).
+    // Tiếp theo: Gọi ApiService.CreateNewsArticleAsync(...) -> Gửi POST sang NewsArticlesController
+    // =========================================================================================
     public async Task<IActionResult> OnPostCreateAsync()
     {
         if (!SessionHelper.IsStaff(HttpContext.Session) && !SessionHelper.IsAdmin(HttpContext.Session))
@@ -73,6 +87,12 @@ public class NewsArticlesModel : PageModel
         return RedirectToPage(new { keyword = Keyword });
     }
 
+    // =========================================================================================
+    // [LUỒNG CẬP NHẬT BÀI VIẾT & CẬP NHẬT TAGS]:
+    // Kích hoạt khi Staff chỉnh sửa trên Popup Dialog "Edit News Article".
+    // Gán UpdatedById = tài khoản Staff hiện tại.
+    // Tiếp theo: Gọi ApiService.UpdateNewsArticleAsync(...) -> Gửi PUT sang NewsArticlesController
+    // =========================================================================================
     public async Task<IActionResult> OnPostUpdateAsync()
     {
         if (!SessionHelper.IsStaff(HttpContext.Session) && !SessionHelper.IsAdmin(HttpContext.Session))
@@ -102,6 +122,12 @@ public class NewsArticlesModel : PageModel
         return RedirectToPage(new { keyword = Keyword });
     }
 
+    // =========================================================================================
+    // [LUỒNG XÓA BÀI VIẾT (CÓ CONFIRM DIALOG)]:
+    // Kích hoạt sau khi Staff bấm xác nhận xóa trên hộp thoại SweetAlert2.
+    // Tiếp theo: Gọi ApiService.DeleteNewsArticleAsync(id) -> Gửi DELETE sang NewsArticlesController
+    // BackEnd sẽ xóa bài viết và tự động cascade xóa các bản ghi liên kết trong bảng NewsTag.
+    // =========================================================================================
     public async Task<IActionResult> OnPostDeleteAsync(string id)
     {
         if (!SessionHelper.IsStaff(HttpContext.Session) && !SessionHelper.IsAdmin(HttpContext.Session))

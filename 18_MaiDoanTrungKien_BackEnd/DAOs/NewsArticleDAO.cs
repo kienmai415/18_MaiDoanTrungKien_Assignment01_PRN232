@@ -78,6 +78,15 @@ public class NewsArticleDAO
             .ToList();
     }
 
+    // =========================================================================================
+    // [TRUY VẤN BÁO CÁO THỐNG KÊ (TRANG 4 ĐỀ BÀI)]:
+    // "Create a report statistic by the period from StartDate to EndDate (it depends on the news' created date),
+    // and sort data in descending order."
+    // Thực thi LINQ trực tiếp xuống SQL Server:
+    // 1. Where: Lọc bài viết có CreatedDate từ startDate đến hết ngày endDate.
+    // 2. OrderByDescending: Sắp xếp giảm dần theo CreatedDate theo đúng quy định đề bài.
+    // 3. Include: Eager loading nạp sẵn Category, CreatedBy, Tags.
+    // =========================================================================================
     public List<NewsArticle> GetReportStatistics(DateTime startDate, DateTime endDate)
     {
         using var context = new FunewsManagementContext();
@@ -92,6 +101,14 @@ public class NewsArticleDAO
             .ToList();
     }
 
+    // =========================================================================================
+    // [TẠO BÀI VIẾT & XỬ LÝ QUAN HỆ NHIỀU-NHIỀU VỚI BẢNG TAG]:
+    // 1. Kiểm tra trùng lặp mã bài viết (NewsArticleId).
+    // 2. Tự động thiết lập CreatedDate = DateTime.Now.
+    // 3. Lấy các Tag tương ứng từ database dựa trên mảng tagIds và gán vào article.Tags.
+    // 4. Entity Framework Core sẽ tự động insert dữ liệu vào bảng NewsArticle
+    //    và các bản ghi tương ứng vào bảng trung gian NewsTag.
+    // =========================================================================================
     public bool CreateNewsArticle(NewsArticle article, List<int>? tagIds)
     {
         using var context = new FunewsManagementContext();

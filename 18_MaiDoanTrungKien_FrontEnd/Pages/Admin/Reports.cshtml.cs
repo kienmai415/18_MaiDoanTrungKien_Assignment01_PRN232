@@ -30,6 +30,20 @@ public class ReportsModel : PageModel
     public int ActiveArticles => Articles.Count(a => a.NewsStatus);
     public int InactiveArticles => Articles.Count(a => !a.NewsStatus);
 
+    // =========================================================================================
+    // [LUỒNG BÁO CÁO THỐNG KÊ (TRANG 4 ĐỀ BÀI)]:
+    // "Create a report statistic by the period from StartDate to EndDate
+    // (it depends on the news' created date), and sort data in descending order."
+    // Luồng:
+    // 1. Kiểm tra quyền Admin từ Session.
+    // 2. Validate ràng buộc ngày: StartDate không được lớn hơn EndDate.
+    // 3. Gọi ApiService.GetReportStatisticsAsync(StartDate, EndDate)
+    //    -> Gửi GET api/NewsArticles/report?startDate=...&endDate=... sang BackEnd.
+    // 4. BackEnd (NewsArticleDAO) truy vấn LINQ:
+    //    Where(CreatedDate >= StartDate && CreatedDate <= EndDate)
+    //    .OrderByDescending(CreatedDate) (Sắp xếp giảm dần theo ngày tạo).
+    // 5. Tính toán tổng số bài (TotalArticles, ActiveArticles, InactiveArticles) và render bảng báo cáo.
+    // =========================================================================================
     public async Task<IActionResult> OnGetAsync()
     {
         if (!SessionHelper.IsAdmin(HttpContext.Session))

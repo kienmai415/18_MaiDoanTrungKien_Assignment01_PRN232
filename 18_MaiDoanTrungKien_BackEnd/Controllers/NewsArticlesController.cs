@@ -17,6 +17,9 @@ public class NewsArticlesController : ControllerBase
         _newsArticleRepository = newsArticleRepository;
     }
 
+    // =========================================================================================
+    // [API LẤY TOÀN BỘ BÀI VIẾT]: Hỗ trợ OData ($filter, $select, $orderby, $top, $skip)
+    // =========================================================================================
     [HttpGet]
     [EnableQuery]
     public ActionResult<IEnumerable<NewsArticle>> GetNewsArticles()
@@ -25,6 +28,11 @@ public class NewsArticlesController : ControllerBase
         return Ok(articles);
     }
 
+    // =========================================================================================
+    // [API LẤY BÀI VIẾT ACTIVE (CHO KHÁCH VÃNG LAI TRANG CHỦ)]:
+    // "Do not need authentication to view the news article (news status must be active)"
+    // Tiếp theo: Gọi INewsArticleRepository.GetActiveNewsArticles() -> NewsArticleDAO.GetActiveNewsArticles()
+    // =========================================================================================
     [HttpGet("active")]
     [EnableQuery]
     public ActionResult<IEnumerable<NewsArticle>> GetActiveNewsArticles()
@@ -44,6 +52,11 @@ public class NewsArticlesController : ControllerBase
         return Ok(article);
     }
 
+    // =========================================================================================
+    // [API LẤY LỊCH SỬ BÀI VIẾT CỦA STAFF]:
+    // "View news history created by him/her."
+    // Tiếp theo: Gọi INewsArticleRepository.GetNewsArticlesByCreatedBy(staffId)
+    // =========================================================================================
     [HttpGet("my-history/{staffId}")]
     public ActionResult<IEnumerable<NewsArticle>> GetMyNewsHistory(short staffId)
     {
@@ -72,6 +85,13 @@ public class NewsArticlesController : ControllerBase
         return Ok(articles.ToList());
     }
 
+    // =========================================================================================
+    // [API BÁO CÁO THỐNG KÊ CHO ADMIN (TRANG 4 ĐỀ BÀI)]:
+    // "Create a report statistic by the period from StartDate to EndDate (depends on news created date),
+    // and sort data in descending order."
+    // Tiếp theo: Gọi INewsArticleRepository.GetReportStatistics(startDate, endDate)
+    // -> NewsArticleDAO thực hiện LINQ OrderByDescending(CreatedDate).
+    // =========================================================================================
     [HttpGet("reports")]
     public ActionResult<IEnumerable<NewsArticle>> GetReportStatistics([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
     {
@@ -84,6 +104,12 @@ public class NewsArticlesController : ControllerBase
         return Ok(report);
     }
 
+    // =========================================================================================
+    // [API TẠO BÀI VIẾT KÈM GÁN THẺ TAGS]:
+    // Nhận NewsArticleCreateDto gồm thông tin bài và mảng TagIds.
+    // Tiếp theo: Gọi INewsArticleRepository.CreateNewsArticle(article, dto.TagIds)
+    // -> NewsArticleDAO lưu vào bảng NewsArticle và tạo các dòng liên kết bảng NewsTag.
+    // =========================================================================================
     [HttpPost]
     public IActionResult CreateNewsArticle([FromBody] NewsArticleCreateDto dto)
     {

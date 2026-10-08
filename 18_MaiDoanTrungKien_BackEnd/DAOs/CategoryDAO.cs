@@ -83,6 +83,15 @@ public class CategoryDAO
         return context.SaveChanges() > 0;
     }
 
+    // =========================================================================================
+    // [RÀNG BUỘC XÓA DANH MỤC (TRANG 4 ĐỀ BÀI)]:
+    // "The delete action will delete an item in case this item has not belonged to any news articles.
+    // If the item is already stored in a news article cannot delete."
+    // Luồng kiểm tra:
+    // 1. Kiểm tra HasNewsArticles(categoryId): Nếu có bài viết tham chiếu -> Chặn xóa!
+    // 2. Kiểm tra hasChildCategories: Nếu có danh mục con -> Chặn xóa!
+    // 3. Nếu hợp lệ -> Remove khỏi Database và SaveChanges().
+    // =========================================================================================
     public bool DeleteCategory(short categoryId)
     {
         using var context = new FunewsManagementContext();

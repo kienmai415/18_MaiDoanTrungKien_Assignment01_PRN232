@@ -238,6 +238,9 @@ public class ApiService : IApiService
         }
     }
 
+    // =========================================================================================
+    // [GỌI API TẠO DANH MỤC]: Gửi POST "api/Categories" sang BackEnd
+    // =========================================================================================
     public async Task<(bool Success, string Message)> CreateCategoryAsync(CategoryViewModel category)
     {
         try
@@ -363,6 +366,11 @@ public class ApiService : IApiService
         }
     }
 
+    // =========================================================================================
+    // [GỌI API BÁO CÁO THỐNG KÊ (TRANG 4 ĐỀ BÀI)]:
+    // Gửi GET "api/NewsArticles/reports?startDate=...&endDate=..." sang BackEnd
+    // Nhận danh sách bài viết đã được sắp xếp giảm dần theo ngày tạo.
+    // =========================================================================================
     public async Task<List<NewsArticleViewModel>> GetReportStatisticsAsync(DateTime startDate, DateTime endDate)
     {
         try
@@ -377,6 +385,11 @@ public class ApiService : IApiService
         }
     }
 
+    // =========================================================================================
+    // [GỌI API TẠO BÀI VIẾT KÈM TAGS]:
+    // Đóng gói ViewModel và mảng TagIds thành JSON Body gửi POST "api/NewsArticles"
+    // Phía BackEnd sẽ nhận tại: NewsArticlesController.CreateNewsArticle(...)
+    // =========================================================================================
     public async Task<(bool Success, string Message)> CreateNewsArticleAsync(NewsArticleViewModel article, List<int> tagIds)
     {
         try

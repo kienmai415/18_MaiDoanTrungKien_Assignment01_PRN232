@@ -25,6 +25,16 @@ public class IndexModel : PageModel
     [BindProperty(SupportsGet = true)]
     public short? SelectedCategoryId { get; set; }
 
+    // =========================================================================================
+    // [LUỒNG XEM TIN TỨC CHO KHÁCH (TRANG 4 ĐỀ BÀI)]:
+    // "Do not need authentication to view the news article (news status must be active) in this system."
+    // Luồng:
+    // 1. Khách vãng lai truy cập trang chủ /Index không cần đăng nhập.
+    // 2. Tải danh sách chuyên mục đang hoạt động (Active Categories) vào bộ lọc dropdown.
+    // 3. Tải danh sách bài viết CHỈ CÓ TRẠNG THÁI ACTIVE (NewsStatus = true).
+    //    Gọi ApiService.GetActiveNewsArticlesAsync(SearchKeyword) -> GET api/NewsArticles/active.
+    // 4. Nếu người dùng chọn lọc theo chuyên mục (SelectedCategoryId) -> Tiến hành lọc danh sách tương ứng.
+    // =========================================================================================
     public async Task OnGetAsync()
     {
         Categories = await _apiService.GetActiveCategoriesAsync();

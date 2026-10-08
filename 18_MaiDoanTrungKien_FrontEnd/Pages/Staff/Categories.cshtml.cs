@@ -25,6 +25,11 @@ public class CategoriesModel : PageModel
     [BindProperty]
     public CategoryViewModel CategoryForm { get; set; } = new();
 
+    // =========================================================================================
+    // [LUỒNG TẢI DANH MỤC]: Gọi khi Staff truy cập trang /Staff/Categories
+    // Tải danh sách chuyên mục (hỗ trợ lọc từ khóa Keyword).
+    // Tiếp theo: Gọi ApiService.GetCategoriesAsync(Keyword) -> GET api/Categories
+    // =========================================================================================
     public async Task<IActionResult> OnGetAsync()
     {
         if (!SessionHelper.IsStaff(HttpContext.Session) && !SessionHelper.IsAdmin(HttpContext.Session))
@@ -36,6 +41,11 @@ public class CategoriesModel : PageModel
         return Page();
     }
 
+    // =========================================================================================
+    // [LUỒNG TẠO DANH MỤC MỚI]: Kích hoạt khi Staff submit Modal "Add Category".
+    // Hỗ trợ chọn ParentCategoryID để tạo quan hệ phân cấp cha - con.
+    // Tiếp theo: Gọi ApiService.CreateCategoryAsync(...) -> POST api/Categories
+    // =========================================================================================
     public async Task<IActionResult> OnPostCreateAsync()
     {
         if (!SessionHelper.IsStaff(HttpContext.Session) && !SessionHelper.IsAdmin(HttpContext.Session))
@@ -62,6 +72,10 @@ public class CategoriesModel : PageModel
         return RedirectToPage(new { keyword = Keyword });
     }
 
+    // =========================================================================================
+    // [LUỒNG CẬP NHẬT DANH MỤC]: Kích hoạt khi Staff sửa thông tin trên Modal "Edit Category".
+    // Tiếp theo: Gọi ApiService.UpdateCategoryAsync(...) -> PUT api/Categories/{id}
+    // =========================================================================================
     public async Task<IActionResult> OnPostUpdateAsync()
     {
         if (!SessionHelper.IsStaff(HttpContext.Session) && !SessionHelper.IsAdmin(HttpContext.Session))
@@ -88,6 +102,16 @@ public class CategoriesModel : PageModel
         return RedirectToPage(new { keyword = Keyword });
     }
 
+    // =========================================================================================
+    // [LUỒNG XÓA DANH MỤC & RÀNG BUỘC NGHIỆP VỤ (TRANG 4 ĐỀ BÀI)]:
+    // "The delete action will delete an item in case this item has not belonged to any news articles.
+    // If the item is already stored in a news article cannot delete."
+    // Luồng:
+    // 1. Staff xác nhận xóa trên hộp thoại SweetAlert2.
+    // 2. Gọi ApiService.DeleteCategoryAsync(id) -> Gửi DELETE api/Categories/{id}.
+    // 3. Phía BackEnd (CategoryDAO) kiểm tra xem có bài viết nào thuộc danh mục này không.
+    //    Nếu có bài -> Chặn xóa và trả về thông báo lỗi 400.
+    // =========================================================================================
     public async Task<IActionResult> OnPostDeleteAsync(short id)
     {
         if (!SessionHelper.IsStaff(HttpContext.Session) && !SessionHelper.IsAdmin(HttpContext.Session))

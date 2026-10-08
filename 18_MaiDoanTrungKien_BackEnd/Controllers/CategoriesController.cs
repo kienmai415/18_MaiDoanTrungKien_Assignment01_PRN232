@@ -57,6 +57,9 @@ public class CategoriesController : ControllerBase
         return Ok(categories.ToList());
     }
 
+    // =========================================================================================
+    // [API TẠO DANH MỤC]: Tiếp nhận CategoryCreateUpdateDto và chuyển sang Repository
+    // =========================================================================================
     [HttpPost]
     public IActionResult CreateCategory([FromBody] CategoryCreateUpdateDto dto)
     {
@@ -89,6 +92,9 @@ public class CategoriesController : ControllerBase
         }
     }
 
+    // =========================================================================================
+    // [API CẬP NHẬT DANH MỤC]: Sửa tên, mô tả, danh mục cha hoặc trạng thái IsActive
+    // =========================================================================================
     [HttpPut("{id}")]
     public IActionResult UpdateCategory(short id, [FromBody] CategoryCreateUpdateDto dto)
     {
@@ -128,6 +134,13 @@ public class CategoriesController : ControllerBase
         }
     }
 
+    // =========================================================================================
+    // [API XÓA DANH MỤC & RÀNG BUỘC NGHIỆP VỤ (TRANG 4 ĐỀ BÀI)]:
+    // "The delete action will delete an item in case this item has not belonged to any news articles.
+    // If the item is already stored in a news article cannot delete."
+    // Tiếp theo: Gọi ICategoryRepository.DeleteCategory(id) -> CategoryDAO.DeleteCategory(id).
+    // Nếu có bài viết tham chiếu -> Bắt InvalidOperationException và trả về 400 Bad Request.
+    // =========================================================================================
     [HttpDelete("{id}")]
     public IActionResult DeleteCategory(short id)
     {
